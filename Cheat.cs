@@ -6,44 +6,66 @@ using Comora;
 using System.Collections.Generic;
 using Slime.Sprites;
 using Slime.Models;
-using Slime.Managers;
 using System.Diagnostics;
 using System;
+using Slime.Controllers;
 
 namespace Slime
 {
     public class Cheat
     {
         private KeyboardState kStateOld;
+        private MouseState mStateOld;
         private bool isCheat = false;
-        public void Update(GameTime gameTime, ShopManager shopManager, SoulManager soulManager, Player player, Attack attack)
+        public void Draw(SpriteBatch spriteBatch, SpriteFont spriteFont, ShopController shopManager, 
+            CurrencyController currencyController, Player player, AbilityController abilityController) 
+        {
+            /*spriteBatch.DrawString(spriteFont, attack.width + "   " + attack.height,
+                    new Vector2(currencyController.soulOrbPos.X + 100, currencyController.soulOrbPos.Y + 5), Color.White, 0, Vector2.Zero, 1f,
+                    SpriteEffects.None, 0.95f);
+            spriteBatch.DrawString(spriteFont, attack.position.X + "  " + attack.position.Y,
+                    new Vector2(currencyController.soulOrbPos.X + 100, currencyController.soulOrbPos.Y + 50), Color.White, 0, Vector2.Zero, 1f,
+                    SpriteEffects.None, 0.95f);*/
+        }
+        public void Update(GameTime gameTime, ShopController shopManager, CurrencyController currencyController, Player player, 
+            AttackController attackController, AbilityController abilityController, MapController mapController)
         {
             KeyboardState kState = Keyboard.GetState();
-            if (kState.IsKeyDown(Keys.C) && kStateOld.IsKeyUp(Keys.C))
+            MouseState mState = Mouse.GetState();
+
+            if (Keyboard.GetState().IsKeyDown(Keys.G))
             {
-                if (isCheat)
-                {
-                    isCheat = false;
-                }
-                else if (!isCheat)
-                {
-                    isCheat = true;
-                }
+                currencyController.souls += 10;
             }
-            if (isCheat)
+            if (kState.IsKeyDown(Keys.D0))
             {
+                mapController.newMap = Map.temple;
+            }
+            if (kState.IsKeyDown(Keys.T))
+            {
+                player.isGhost = true;
+                attackController.damage = 1;
+                player.speed = 180f;
+                player.health = 10;
+            }
+            if (kState.IsKeyDown(Keys.C))
+            {
+                abilityController.isTeleportUnlocked = true;
+                attackController.cooldown = 0.4f;
+                abilityController.teleportCooldown = 0.1f;
                 player.speed = 900f;
-                attack.Damage = 50;
-                attack.Cooldown = 0.1f;
+                attackController.damage = 100;
+                player.maxHealth = 1000;
+                player.health = 1000;
+                player.isGhost = false;
+                player.regenerationAmount = 100;
+                abilityController.isTimeStopUnlocked = true;
             }
             if (kState.IsKeyDown(Keys.P))
             {
                 shopManager.isShopOpen = true;
             }
-            if (Keyboard.GetState().IsKeyDown(Keys.G))
-            {
-                soulManager.Souls += 1000;
-            }
+            
             if (kState.IsKeyDown(Keys.H))
             {
                 player.health = player.maxHealth;
@@ -52,8 +74,24 @@ namespace Slime
             {
                 player.hasMetWitch = true;
             }
-            
+            if (kState.IsKeyDown(Keys.J) && kStateOld.IsKeyUp(Keys.J))
+            {
+                if (attackController.currentAttack == "normal")
+                {
+                    attackController.currentAttack = "fireball";
+                }
+                else
+                {
+                    attackController.currentAttack = "normal";
+                }
+            }
+            if (kState.IsKeyDown(Keys.O))
+            {
+                attackController.damage = 15000;
+            }
+
             kStateOld = kState;
+            mStateOld = mState;
         }
     }
 }
